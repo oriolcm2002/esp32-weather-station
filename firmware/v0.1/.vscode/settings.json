@@ -14,5 +14,7 @@
     "--background-index",
     "--query-driver=**",
     "--compile-commands-dir=d:\\Proyectos\\Collbató - Station\\esp32-weather-station\\firmware\\v0.1\\build"
-  ]
+  ],
+  "idf.monitorPort": "COM5",
+  "idf.flashType": "UART"
 }
