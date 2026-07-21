@@ -4,7 +4,7 @@
   "idf.openOcdConfigs": [
     "board/esp32-wrover-kit-3.3v.cfg"
   ],
-  "idf.portWin": "COM5",
+  "idf.portWin": "COM6",
   "idf.currentSetup": "C:/Espressif/frameworks/esp-idf-v5.4.1/",
   "idf.customExtraVars": {
     "IDF_TARGET": "esp32"
@@ -15,6 +15,6 @@
     "--query-driver=**",
     "--compile-commands-dir=d:\\Proyectos\\Collbató - Station\\esp32-weather-station\\firmware\\v0.1\\build"
   ],
-  "idf.monitorPort": "COM5",
+  "idf.monitorPort": "COM6",
   "idf.flashType": "UART"
 }
