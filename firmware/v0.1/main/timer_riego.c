@@ -3,7 +3,7 @@
 #include <sys/time.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_sntp.h"      // Esta funciona perfectamente cuando 'lwip' está en el CMakeLists.txt
+#include "esp_sntp.h"
 #include "esp_log.h"
 #include "relay_control.h"
 #include "mqtt_app.h"
@@ -20,8 +20,7 @@ static void obtener_hora_sntp(void) {
     esp_sntp_setservername(0, "pool.ntp.org");
     esp_sntp_init();
 
-    // Establecer Zona Horaria para España/Europa Central (Ajusta si estás en otro país)
-    // CET-1CEST,M3.5.0,M10.5.0/3 aplica automáticamente el horario de verano/invierno
+    // Configuración de zona horaria para CET/CEST (España / Europa Central)
     setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 1);
     tzset();
 }
@@ -36,14 +35,17 @@ static void tarea_verificar_riego(void *pvParameters) {
     while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET) {
         vTaskDelay(pdMS_TO_TICKS(2000));
     }
-    ESP_LOGI(TAG, "¡Hora NTP sincronizada exitosamente!");
+
+    // Muestra la fecha y la hora formateada justo al sincronizar
+    time(&now);
+    localtime_r(&now, &timeinfo);
+    char strftime_buf[64];
+    strftime(strftime_buf, sizeof(strftime_buf), "%A, %d de %B de %Y - %H:%M:%S", &timeinfo);
+    ESP_LOGI(TAG, "¡Hora NTP sincronizada exitosamente! [%s]", strftime_buf);
 
     while (1) {
         time(&now);
         localtime_r(&now, &timeinfo);
-
-        // Imprime la hora local en los logs para monitorear
-        // ESP_LOGI(TAG, "Hora actual: %02d:%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
 
         if (config_actual.activo) {
             // Comprobar si coincide la hora y el minuto
@@ -53,14 +55,14 @@ static void tarea_verificar_riego(void *pvParameters) {
                     ESP_LOGI(TAG, "¡Iniciando ciclo de riego programado por %lu segundos!", config_actual.duracion_seg);
                     
                     set_pump_state(true); // Encender bomba
-                    mqtt_publicar_estado("BOMBA_ON"); // <--- Avisa al móvil de que empezó a regar
+                    mqtt_publicar_estado("BOMBA_ON"); // Avisa a la app móvil
                     
                     // Esperar la duración del riego
                     vTaskDelay(pdMS_TO_TICKS(config_actual.duracion_seg * 1000));
                     
                     set_pump_state(false); // Apagar bomba
                     ESP_LOGI(TAG, "Ciclo de riego finalizado.");
-                    mqtt_publicar_estado("BOMBA_OFF"); // <--- Avisa al móvil de que terminó
+                    mqtt_publicar_estado("BOMBA_OFF"); // Avisa a la app móvil
                 }
             } else {
                 // Resetear la bandera cuando salimos del minuto programado
