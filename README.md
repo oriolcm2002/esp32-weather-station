@@ -9,5 +9,5 @@ ESP32-based IoT weather station with MQTT connectivity and automatic irrigation.
 - El estado se publica en: `riego/estado`
 
 ### Cambiar el horario de riego
-- Publicar: `20,15,60`
+- Publicar: `20,15,60` (Regar a las 20:15h, durante 60 segundos)
 - Topic: `riego/config`
