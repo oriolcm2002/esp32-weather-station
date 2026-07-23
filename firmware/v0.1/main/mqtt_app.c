@@ -44,7 +44,17 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
                      event->topic_len, event->topic,
                      event->data_len, event->data);
 
-            if (strncmp(event->topic, "riego/config", event->topic_len) == 0) {
+            // 1. Comando de solicitud de estado
+            if (strncmp(event->topic, "riego/cmd", event->topic_len) == 0) {
+                if (strncmp(event->data, "GET", event->data_len) == 0 || 
+                    strncmp(event->data, "STATUS", event->data_len) == 0) {
+                    
+                    // Publica la hora actual, hora de riego y duración
+                    publicar_reporte_estado();
+                }
+            }
+            // 2. Nueva configuración de riego (ej. "07,30,300")
+            else if (strncmp(event->topic, "riego/config", event->topic_len) == 0) {
                 int h, m, dur;
                 if (sscanf(event->data, "%d,%d,%d", &h, &m, &dur) == 3) {
                     config_riego_t nueva_cfg = {
@@ -55,7 +65,9 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
                     };
                     actualizar_config_riego(nueva_cfg);
                     guardar_config_riego_nvs(nueva_cfg);
-                    mqtt_publicar_estado("CONFIG_ACTUALIZADA");
+                    
+                    // Devuelve inmediatamente el nuevo reporte completo
+                    publicar_reporte_estado();
                 }
             }
             break;

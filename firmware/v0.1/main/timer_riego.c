@@ -89,3 +89,21 @@ void actualizar_config_riego(config_riego_t nueva_config) {
              config_actual.hora, config_actual.minuto, config_actual.duracion_seg,
              config_actual.activo ? "Activo" : "Inactivo");
 }
+
+
+void publicar_reporte_estado(void) {
+    time_t now;
+    struct tm timeinfo;
+    time(&now);
+    localtime_r(&now, &timeinfo);
+
+    char reporte[128];
+    snprintf(reporte, sizeof(reporte), 
+             "HORA_ACTUAL:%02d:%02d:%02d | RIEGO:%02d:%02d | DURACION:%lus | ACTIVO:%s",
+             timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec,
+             config_actual.hora, config_actual.minuto,
+             config_actual.duracion_seg,
+             config_actual.activo ? "SI" : "NO");
+
+    mqtt_publicar_estado(reporte);
+}

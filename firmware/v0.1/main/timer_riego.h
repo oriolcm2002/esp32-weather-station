@@ -17,4 +17,6 @@ void timer_riego_init(config_riego_t config_inicial);
 // Permite cambiar la configuración en tiempo de ejecución
 void actualizar_config_riego(config_riego_t nueva_config);
 
+void publicar_reporte_estado(void);
+
 #endif // TIMER_RIEGO_H
